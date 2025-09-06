@@ -4,6 +4,7 @@
 import streamlit as st
 import openai
 import pickle
+from chatbot_ped import PediatricChatbot
 
 st.set_page_config(page_title="Pediatrician Chatbot", page_icon="🧸")
 
