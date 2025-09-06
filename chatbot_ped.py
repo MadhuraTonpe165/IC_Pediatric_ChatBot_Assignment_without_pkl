@@ -1,4 +1,5 @@
 # chatbot_ped.py
+!pip install openai==0.28
 import openai
 
 class PediatricChatbot:
