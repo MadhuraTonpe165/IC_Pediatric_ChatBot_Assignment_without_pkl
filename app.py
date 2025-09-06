@@ -3,7 +3,7 @@
 
 import streamlit as st
 import openai
-from chatbot_ped import system_prompt, add_message, get_response
+import pickle
 
 st.set_page_config(page_title="Pediatrician Chatbot", page_icon="🧸")
 
@@ -16,34 +16,35 @@ api_key = st.text_input("🔑 Enter your OpenAI API Key:", type="password")
 if api_key:
     openai.api_key = api_key
 
-    # Initialize session state
-    if "messages" not in st.session_state:
-        st.session_state.messages = [system_prompt()]
+    # Load chatbot from pickle (once)
+    if "chatbot" not in st.session_state:
+        with open("Pedictric_Help_bot.pkl", "rb") as f:
+            st.session_state.chatbot = pickle.load(f)
+
+    chatbot = st.session_state.chatbot
 
     # Display past messages
-    for msg in st.session_state.messages:
+    for msg in chatbot.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
     # User input
     if prompt := st.chat_input("Ask me anything..."):
-        add_message(st.session_state.messages, "user", prompt)
+        chatbot.add_message("user", prompt)
         with st.chat_message("user"):
             st.write(prompt)
 
         try:
-            reply = get_response(st.session_state.messages)
+            reply = chatbot.get_response()
             with st.chat_message("assistant"):
                 st.write(reply)
-
-            add_message(st.session_state.messages, "assistant", reply)
 
         except Exception as e:
             st.error(f"Error: {e}")
 
     # Button to clear chat
     if st.button("🔄 Clear Chat"):
-        st.session_state.messages = [system_prompt()]
+        chatbot.messages = [chatbot.messages[0]]  # reset with only system prompt
         st.experimental_rerun()
 else:
     st.warning("⚠️ Please enter your OpenAI API key to start chatting.")
